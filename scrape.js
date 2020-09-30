@@ -5,16 +5,20 @@ const notifier = require('node-notifier');
 let number = 1;
 let promoLinks = [];
 
+
+const isProductWithLowPrice = product => {
+    const { price, regular_price, regular_price_amount, price_amount } = product;
+    return price === '0,01 zł' || regular_price === '0,01 zł' ||
+        price_amount === 0.01 || regular_price_amount === 0.01;
+}
+
 const scrapePage = (pageUrl) => {
     axios(pageUrl)
         .then(response => {
-            const products = response.data.products;
+            const { products } = response.data;
             if (products && products.length !== 0) {
                 products.forEach(product => {
-                    if (product.price === '0,01 zł' ||
-                        product.regular_price === '0,01 zł' ||
-                        product.price_amount === 0.01 ||
-                        product.regular_price_amount === 0.01) {
+                    if (isProductWithLowPrice(product)) {
                         if (!promoLinks.find(link => link === product.url)) {
                             console.log('HIT - no.' + number);
                             console.log(product.url);
